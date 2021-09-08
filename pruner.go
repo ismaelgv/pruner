@@ -4,12 +4,34 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
+
+const gitDir = ".git"
+
+const rootDir = "/"
+
+// Search for git repository root directory. If not present in the current
+// directory keeps looking on the parent directories.
+func searchRoot(path string) (string, error) {
+	gitPath := path + "/" + gitDir
+
+	_, err := os.Stat(gitPath)
+	if err != nil {
+		if path == rootDir {
+			return "", os.ErrNotExist
+		}
+		path = filepath.Dir(path)
+		return searchRoot(path)
+	}
+
+	return path, nil
+}
 
 func difference(a []string, b []string) (diff []string) {
 	m := make(map[string]bool)
@@ -75,7 +97,17 @@ func getBranches(repository *git.Repository) ([]string, error) {
 }
 
 func run() error {
-	repository, err := git.PlainOpen("./")
+	path, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	path, err = searchRoot(path)
+	if err != nil {
+		return err
+	}
+
+	repository, err := git.PlainOpen(path)
 	if err != nil {
 		return err
 	}
