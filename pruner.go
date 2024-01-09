@@ -115,6 +115,7 @@ func run() error {
 	fetch := false
 	fetchPrompt := &survey.Confirm{
 		Message: "Do you want to fetch the remote repository?",
+        Default: true,
 	}
 	survey.AskOne(fetchPrompt, &fetch)
 	if fetch {
@@ -127,6 +128,7 @@ func run() error {
 	prune := false
 	prunePrompt := &survey.Confirm{
 		Message: "Do you want to prune the remote repository?",
+        Default: true,
 	}
 	survey.AskOne(prunePrompt, &prune)
 	if prune {
